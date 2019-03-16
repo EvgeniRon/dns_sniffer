@@ -1,0 +1,861 @@
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 45690
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 1024
+   |-Number of authority entries: 2560
+   |-Number of resource entries : 2048
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 49837
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 768
+   |-Number of authority entries: 256
+   |-Number of resource entries : 0
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 27849
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 256
+   |-Number of authority entries: 1280
+   |-Number of resource entries : 2048
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 32091
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 0
+   |-Number of authority entries: 256
+   |-Number of resource entries : 0
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 640
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 256
+   |-Number of authority entries: 1280
+   |-Number of resource entries : 2048
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 39201
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 256
+   |-Number of authority entries: 1024
+   |-Number of resource entries : 2048
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 42812
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 256
+   |-Number of authority entries: 1024
+   |-Number of resource entries : 2048
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 31142
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 0
+   |-Number of authority entries: 256
+   |-Number of resource entries : 0
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 30084
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 512
+   |-Number of authority entries: 2048
+   |-Number of resource entries : 2048
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 4837
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 0
+   |-Number of authority entries: 256
+   |-Number of resource entries : 0
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 2273
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 256
+   |-Number of authority entries: 512
+   |-Number of resource entries : 512
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 63239
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 256
+   |-Number of authority entries: 1024
+   |-Number of resource entries : 1024
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 30756
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 0
+   |-Number of authority entries: 256
+   |-Number of resource entries : 0
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 54495
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 512
+   |-Number of authority entries: 1024
+   |-Number of resource entries : 1024
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 27535
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 512
+   |-Number of authority entries: 1024
+   |-Number of resource entries : 2048
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 47673
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 256
+   |-Number of authority entries: 1280
+   |-Number of resource entries : 2560
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 50987
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 256
+   |-Number of authority entries: 1280
+   |-Number of resource entries : 2560
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 41679
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 512
+   |-Number of authority entries: 1024
+   |-Number of resource entries : 2048
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 57602
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 256
+   |-Number of authority entries: 256
+   |-Number of resource entries : 0
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 45686
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 512
+   |-Number of authority entries: 256
+   |-Number of resource entries : 0
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 42987
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 768
+   |-Number of authority entries: 2048
+   |-Number of resource entries : 2304
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 53144
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 0
+   |-Number of authority entries: 256
+   |-Number of resource entries : 0
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 49104
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 256
+   |-Number of authority entries: 512
+   |-Number of resource entries : 1024
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 30806
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 256
+   |-Number of authority entries: 256
+   |-Number of resource entries : 0
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 50693
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 0
+   |-Number of authority entries: 256
+   |-Number of resource entries : 0
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 47924
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 256
+   |-Number of authority entries: 1280
+   |-Number of resource entries : 2048
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 27262
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 512
+   |-Number of authority entries: 512
+   |-Number of resource entries : 512
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 2455
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 256
+   |-Number of authority entries: 512
+   |-Number of resource entries : 512
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 5671
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 0
+   |-Number of authority entries: 256
+   |-Number of resource entries : 0
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 36704
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 0
+   |-Number of authority entries: 256
+   |-Number of resource entries : 0
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 50620
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 0
+   |-Number of authority entries: 256
+   |-Number of resource entries : 0
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 33873
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 256
+   |-Number of authority entries: 1280
+   |-Number of resource entries : 2048
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 47501
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 256
+   |-Number of authority entries: 1280
+   |-Number of resource entries : 2048
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 45399
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 0
+   |-Number of authority entries: 256
+   |-Number of resource entries : 0
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 42048
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 256
+   |-Number of authority entries: 1280
+   |-Number of resource entries : 2048
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 9330
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 1024
+   |-Number of authority entries: 1024
+   |-Number of resource entries : 1536
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 12424
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 0
+   |-Number of authority entries: 256
+   |-Number of resource entries : 0
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 57599
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 512
+   |-Number of authority entries: 1024
+   |-Number of resource entries : 2048
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 62418
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 512
+   |-Number of authority entries: 1024
+   |-Number of resource entries : 2048
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 59008
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 512
+   |-Number of authority entries: 1024
+   |-Number of resource entries : 2048
+
+
+Packet type: DNS
+
+DNS message
+
+DNS Header:
+   |-Identification Number      : 9241
+   |-Recursion Desired          : 1
+   |-Truncated Message          : 0
+   |-Authoritative Answer       : 0
+   |-Purpose of message         : 0
+   |-Query/Response Flag        : 1
+   |-Response code              : 0
+   |-Checking Disabled          : 0
+   |-Authenticated data         : 0
+   |-Recursion available        : 1
+   |-Number of question entries : 256
+   |-Number of answer entries   : 512
+   |-Number of authority entries: 1024
+   |-Number of resource entries : 2048
+
+

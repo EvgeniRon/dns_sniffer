@@ -18,8 +18,18 @@
 #include<unistd.h>
 #include<time.h>
 #include<signal.h>
+#include "socket.h"
+
 #define zero(s) memset(s, 0, sizeof(s))
 int arp=0, ipv4=0, ipv6=0, tcp=0, udp=0, http=0, dns=0, ftp=0, smtp=0, num=0;
+
+struct dns_info{
+    time_t start;   /* Entry creation time */
+    struct in_addr daddr;   /* destination addresses */
+    struct in_addr raddr;   /* resolved domain address */
+    unsigned short dport;   /* destination port */
+    char *domain_name;      /* domain name */
+};
 
 void  INThandler(int sig)
 {
@@ -42,8 +52,8 @@ void  INThandler(int sig)
     
 }
 
-struct dnshdr
-{
+/* DNS header in host byte order with bit fiels*/
+typedef struct dnshdr {
     unsigned short id; // identification number
  
     unsigned char rd :1; // recursion desired
@@ -62,26 +72,7 @@ struct dnshdr
     unsigned short ans_count; // number of answer entries
     unsigned short auth_count; // number of authority entries
     unsigned short add_count; // number of resource entries
-};
-
-struct ipv6_header {
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-    u_int8_t traffic_class_1:4, ip_version:4;
-    u_int8_t flow_label_1:4, traffic_class_2:4;
-#elif __BYTE_ORDER == __BIG_ENDIAN
-    u_int8_t ip_version:4, traffic_class_1:4;
-    u_int8_t traffic_class_2:4, flow_label:4;
-#else
-#error  "Please fix <bits/endian.h>"
-#endif
-    u_int16_t flow_label_2;
-    u_int16_t payload_length;
-    u_int8_t next_header;
-    u_int8_t hop_limit;
-
-    u_char src_ipv6[16];
-    u_char dst_ipv6[16];
-};
+} dnshdr_t;
 
 FILE *logfile;
 struct sockaddr_in source,dest;
@@ -182,31 +173,6 @@ void print_IPv4_header (struct iphdr *iph)
 
 }
 
-void print_IPV6_header(struct ipv6_header *hdr){
-    char src[50], dst[50], stemp[5], dtemp[5];
-    int i;
-
-    // hdr = (struct ipv6_header *)(packet + 14);
-    zero(src);
-    zero(dst);
-    for (i = 1; i <= 16; i++) {
-        if (i % 2 == 0 && i < 16) {
-            sprintf(stemp, "%02x:", hdr->src_ipv6[i - 1]);
-            sprintf(dtemp, "%02x:", hdr->dst_ipv6[i - 1]);
-        } else {
-            sprintf(stemp, "%02x", hdr->src_ipv6[i - 1]);
-            sprintf(dtemp, "%02x", hdr->dst_ipv6[i - 1]);
-        }
-        strcat(src, stemp);
-        strcat(dst, dtemp);
-    }
-    fprintf(logfile , "\nIPV6 Header\n");
-    fprintf(logfile , "   |-Source       : %s\n" , src);
-    fprintf(logfile , "   |-Destination  : %s\n" , dst);
-    fprintf(logfile , "\n");
-
-
-}
 
 //print UDP header
 void print_UDP_header (struct udphdr *udph)
@@ -237,6 +203,7 @@ void print_DNS_Header (struct dnshdr *dnsh)
     fprintf(logfile , "   |-Number of answer entries   : %d\n",(dnsh->ans_count));
     fprintf(logfile , "   |-Number of authority entries: %d\n",dnsh->auth_count);
     fprintf(logfile , "   |-Number of resource entries : %d\n",dnsh->add_count);
+    fprintf(logfile , "   |-Number of resource entries : %d\n",dnsh->add_count);
     fprintf(logfile , "\n");
     return;
 }
@@ -257,248 +224,163 @@ void print_DNS_Header (struct dnshdr *dnsh)
 // }
 
 
-void process_TCP(unsigned char* buffer, int size, int type)
- {
+static void process_tcp_dns(struct tcphdr *hdr) {
     tcp++;
-    struct tcphdr *hdr;
-    if(type){
-        hdr = (struct tcphdr *)(buffer + sizeof(struct ether_header) + sizeof(struct iphdr));
-    }
-    else{
-        hdr = (struct tcphdr *)(buffer + sizeof(struct ether_header) + sizeof(struct ip6_hdr));
-    }
 
     // printf("Size of TCP header: %d\n", sizeof(struct tcphdr));
-
-
-	struct ether_header *eth = (struct ether_header*)(buffer);
-
-    u_short src_port;
-	u_short dst_port;
-	u_int seq;
-	u_int ack;
-	src_port = ntohs(hdr->source);
-	dst_port = ntohs(hdr->dest);
-	seq = ntohl(hdr->seq);
-	ack = ntohl(hdr->ack);
-	int hdrsize;
+	unsigned short src_port = ntohs(hdr->source);
+	unsigned short dst_port = ntohs(hdr->dest);
     
-    if (src_port == 53 || dst_port == 53)  //DNS protocol
-		// process_DNS inter,size);
-        {
+    if (src_port == 53 || dst_port == 53) {
             dns++;
-                        fprintf(logfile , "Packet type: DNS\n");
+            fprintf(logfile , "Packet type: DNS\n");
             // printf("*******************************\n");
             struct dnshdr *shdr;
             // printf("Size of DNS: %d\n", sizeof(struct dnshdr));
             // int size = sizeof(buffer) - (sizeof(struct dnshdr) + sizeof(struct tcphdr) + sizeof(struct ether_header) + sizeof(struct iphdr));
             // printf("Size of payload: %d\n", size);
-            if(type){  
-            shdr = (struct dnshdr *)(buffer + sizeof(struct tcphdr) + sizeof(struct ether_header) + sizeof(struct iphdr));
-                        hdrsize= sizeof(struct tcphdr) + sizeof(struct ether_header) + sizeof(struct iphdr);
+            shdr = (struct dnshdr *)((char *)hdr + sizeof(struct tcphdr));
             fprintf(logfile , "\n");
             fprintf(logfile , "DNS message\n");
             // PrintData(buffer + hdrsize, size-hdrsize);
             print_DNS_Header(shdr); 
             fprintf(logfile , "\n");
-
-            }
-            else{
-            shdr = (struct dnshdr *)(buffer + sizeof(struct tcphdr) + sizeof(struct ether_header) + sizeof(struct ip6_hdr));
-                        hdrsize= sizeof(struct udphdr) + sizeof(struct ether_header) + sizeof(struct ip6_hdr);
-            fprintf(logfile , "\n");
-            fprintf(logfile , "DNS message\n");
-            // PrintData(buffer + hdrsize, size-hdrsize);
-            print_DNS_Header(shdr); 
-            fprintf(logfile , "\n");
-
-            }
-            // print_DNS(shdr);  
-            
-            // printf("DNS\n");                    
-        }
+        }              
 }
 
-void process_UDP(unsigned char* buffer, int size, int type){
+static void process_udp_dns(struct udphdr *hdr) {
     udp++;
-   struct udphdr *hdr;
 
-    if(type){
-        hdr = (struct udphdr *)(buffer + sizeof(struct ether_header) + sizeof(struct iphdr));
-    }
-    else{
-        hdr = (struct udphdr *)(buffer + sizeof(struct ether_header) + sizeof(struct ip6_hdr));
-    }
-
-    u_short src_port;
-    u_short dst_port;
+    unsigned short src_port;
+    unsigned short dst_port;
    
     src_port = ntohs(hdr->source);
     dst_port = ntohs(hdr->dest);
     int hdrsize;
 
+    /* sanity check - dns using port 53 */
     if (src_port == 53 || dst_port == 53) {
-            dns++;
-            fprintf(logfile , "Packet type: DNS\n");
+        dns++;
+        fprintf(logfile , "Packet type: DNS\n");
 
-            // printf("*******************************\n");
-            struct dnshdr *shdr;
-            // printf("Size of DNS: %d\n", sizeof(struct dnshdr));
-            // int size = sizeof(buffer) - (sizeof(struct dnshdr) + sizeof(struct tcphdr) + sizeof(struct ether_header) + sizeof(struct iphdr));
-            // printf("Size of payload: %d\n", size);
-            
-            if(type){  
-            shdr = (struct dnshdr *)(buffer + sizeof(struct udphdr) + sizeof(struct ether_header) + sizeof(struct iphdr));
-                        hdrsize= sizeof(struct udphdr) + sizeof(struct ether_header) + sizeof(struct iphdr);
-            fprintf(logfile , "\n");
-            fprintf(logfile , "DNS message\n");
-            // PrintData(buffer + hdrsize, size-hdrsize);
-            print_DNS_Header(shdr); 
-            fprintf(logfile , "\n");
+        // printf("*******************************\n");
+        struct dnshdr *dns_hdr;
+        // printf("Size of DNS: %d\n", sizeof(struct dnshdr));
+        // int size = sizeof(buffer) - (sizeof(struct dnshdr) + sizeof(struct tcphdr) + sizeof(struct ether_header) + sizeof(struct iphdr));
+        // printf("Size of payload: %d\n", size);
+        
+        dns_hdr = (struct dnshdr *)((char *)hdr + sizeof(struct udphdr));
+        fprintf(logfile , "\n");
+        fprintf(logfile , "DNS message\n");
 
-            }
-            else{
-            shdr = (struct dnshdr *)(buffer + sizeof(struct udphdr) + sizeof(struct ether_header) + sizeof(struct ip6_hdr));
-            hdrsize= sizeof(struct udphdr) + sizeof(struct ether_header) + sizeof(struct ip6_hdr);
-            fprintf(logfile , "\n");
-            fprintf(logfile , "DNS message\n");
-            // PrintData(buffer + hdrsize, size-hdrsize);
-            print_DNS_Header(shdr); 
-            fprintf(logfile , "\n");
-
-            }
+        print_DNS_Header(dns_hdr); 
+        fprintf(logfile , "\n");
+    }
             // print_DNS(shdr);  
                                 
             // printf("DNS\n");                    
-        }
 }
 
-void process_IPv4(unsigned char* buffer, int size)
-{
+static void process_ipv4_packet(unsigned char* buffer, int size) {
     ipv4++;
-	struct iphdr *iph = (struct iphdr *)(buffer + sizeof(struct ether_header));
+	struct iphdr *iph;
+    struct tcphdr *tcphdr;
+    struct udphdr *udphdr;
+
+    iph = (struct iphdr *)(buffer + sizeof(struct ether_header));
 
     switch (iph->protocol) {
-	case 6:
-		process_TCP(buffer,size,1);
-		break;
+        case IPPROTO_TCP:
+            tcphdr = (struct tcphdr *)(buffer + sizeof(struct ether_header) + sizeof(struct iphdr));
+            process_tcp_dns(tcphdr);
+            break;
 
-	case 17:
-		process_UDP(buffer,size,1);
-		break;
+        case IPPROTO_UDP:
+            udphdr = (struct udphdr *)(buffer + sizeof(struct ether_header) + sizeof(struct iphdr));
+            process_udp_dns(udphdr);
+            break;
 
-	default:
-       fprintf(logfile , "Packet type: IPv4\n");
-		print_IPv4_header(iph);
-		break;
+        default:
+            break;
 	}
 }
 
-void process_IPv6(unsigned char* buffer, int size)
-{
+static void process_ipv6_packet(unsigned char* buffer, int size) {
 
     ipv6++;
-    struct ipv6_header *ip6h = (struct ipv6_header *)(buffer+ sizeof(struct ether_header));
-    struct ether_header *eth = (struct ether_header*)(buffer);
-    printf("Size of ipv6 header: %d\n", sizeof(struct ipv6_header));
+    struct ip6_hdr *ip6h;
+    struct tcphdr *tcphdr; 
+    struct udphdr *udphdr;
 
-    switch (ntohs(ip6h->next_header))
+    ip6h  = (struct ip6_hdr *)(buffer+ sizeof(struct ether_header));
+    printf("Size of ipv6 header: %d\n", sizeof(struct ip6_hdr));
+
+    switch (ntohs(ip6h->ip6_nxt))
     {
-        case 6 :
-            // printf("This is TCP inside IPv6\n");
-            process_TCP(buffer,size,0);
-
+        case IPPROTO_TCP:
+            tcphdr = (struct tcphdr *)(buffer + sizeof(struct ether_header) + sizeof(struct ip6_hdr));
+            process_tcp_dns(tcphdr);
             break;
-        case 17:
-            // printf("This is UDP inside TPv6\n");
-            process_UDP(buffer,size,0);
 
+        case IPPROTO_UDP:
+            udphdr = (struct udphdr *)(buffer + sizeof(struct ether_header) + sizeof(struct ip6_hdr));
+            process_udp_dns(udphdr);
             break;
+
         default:
             break;
     }
 }
 
-void process_Ether(unsigned char* buffer, int size) {
-	struct ether_header *eth = (struct ether_header*)(buffer);
-    //Get the IP Header part of this packet , excluding the ethernet header
+static void process_packet(void *buffer, int size) {
+    
+    struct ether_header *eth;
+    struct ip *ip;
+    struct tcphdr *tcp;
+    struct udphdr *udp;
+    struct in_addr addr;
+
+	eth = (struct ether_header*)(buffer);
+    
     ++total;
-    // printf("Size of ether header: %d\n", sizeof(struct ether_header));
+
+    //Get the IP Header part of this packet , excluding the ethernet header
     switch (ntohs(eth->ether_type)) //Check the Protocol and do accordingly...
     {
-        case 0x0800:  //IPv4 Protocol
-            process_IPv4(buffer,size);
-        	// printf("IPv4\n");
-            // printEther(eth);
-
+        case ETHERTYPE_IP:  //IPv4 Protocol
+            process_ipv4_packet(buffer,size);
             break;
          
-        case 0x86dd:  //IPv6 Protocol
-            process_IPv6(buffer,size);
-           	// printf("IPv6\n");
-            // printEther(eth);
-
+        case ETHERTYPE_IPV6:    //IPv6 Protocol
+            process_ipv6_packet(buffer,size);
             break;
          
-        default: //Some Other Protocol
+        default: //Some Other Protocol - should not get here
             break;
     }
 }
-//tcpdump -i any 'port 53 and ((udp and (not udp[10] & 128 = 0)) or (tcp and (not tcp[((tcp[12] & 0xf0) >> 2) + 2] & 128 = 0)))' -dd
-int main()'
-{'
+
+int main()
+{
     int saddr_size , data_size;
     struct sockaddr saddr;
-         
-    unsigned char *buffer = (unsigned char *) malloc(65536); //Its Big!
-     
+
+    /* Initialize the packet capture interface */
+    if (init_dns_socket()) return 1;
+
     logfile=fopen("log.txt","w");
     if(logfile==NULL) 
     {
         printf("Unable to create log.txt file.");
     }
     printf("Starting...\n");
-     
-    int sock_raw = socket( AF_PACKET , SOCK_RAW , htons(ETH_P_ALL)) ;
-     
-    if(sock_raw < 0)
-    {
-        //Print the error with proper message
-        perror("Socket Error");
-        return 1;
-    }
+
     clock_t CPU_time_1 = clock();
     printf("CPU start time is : %d \n", CPU_time_1);
+
     signal(SIGINT, INThandler);
-    while(1)
-    {
+    run_sniffer(process_packet);
 
-        saddr_size = sizeof saddr;
-        //Receive a packet
-        data_size = recvfrom(sock_raw , buffer , 65536 , 0 , &saddr , (socklen_t*)&saddr_size);
-        if(data_size <0 )
-        {
-            printf("Recvfrom error , failed to get packets\n");
-            return 1;
-        }
-        //Now process the packet
-        num++;
-        // sprintf(str, " %02X", buffer);
-        // puts(str);
-        // PrintData(buffer, data_size);
-            fprintf(logfile , "\nPacket number %d\n", num);
-
-      // printf("Size of packet: %d\n", data_size);
-
-
-        process_Ether(buffer , data_size);
-        // char ch;
-       	// if(getchar())
-        // if(ch=='Q')// Q for Quit
-             // exit(0);
-    }
-
-    close(sock_raw);
-    printf("Finished");
-    return 0;
+    /* Should'nt get here */
+    return 1;
 }
