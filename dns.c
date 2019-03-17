@@ -1,7 +1,8 @@
-#include "dns.h"
-#include "stdio.h"
+#include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <arpa/inet.h>
+#include "dns.h"
 
 /*
  *
@@ -60,7 +61,7 @@ void parse_dns_response(void *buffer) {
     query->question = (question_const_fields_t *)(query->qname + query->qname_length);
 
 	domain_name = parse_query_name(query->qname, query->qname_length);
-	printf(domain_name);
+	printf("domain name: %s\n", domain_name);
 	free(domain_name);
 	return;
 }
