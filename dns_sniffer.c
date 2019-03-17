@@ -1,4 +1,4 @@
-#include<netinet/in.h> 
+#include<netinet/in.h>
 #include<errno.h>
 #include<netdb.h>
 #include<stdio.h>
@@ -19,6 +19,7 @@
 #include<time.h>
 #include<signal.h>
 #include "socket.h"
+#include "dns.h"
 
 #define zero(s) memset(s, 0, sizeof(s))
 int arp=0, ipv4=0, ipv6=0, tcp=0, udp=0, http=0, dns=0, ftp=0, smtp=0, num=0;
@@ -49,34 +50,12 @@ void  INThandler(int sig)
     printf("SMTP: %d\n", smtp);
     printf("Total: %d\n", num);
           exit(0);
-    
-}
 
-/* DNS header in host byte order with bit fiels*/
-typedef struct dnshdr {
-    unsigned short id; // identification number
- 
-    unsigned char rd :1; // recursion desired
-    unsigned char tc :1; // truncated message
-    unsigned char aa :1; // authoritive answer
-    unsigned char opcode :4; // purpose of message
-    unsigned char qr :1; // query/response flag
- 
-    unsigned char rcode :4; // response code
-    unsigned char cd :1; // checking disabled
-    unsigned char ad :1; // authenticated data
-    unsigned char z :1; // its z! reserved
-    unsigned char ra :1; // recursion available
- 
-    unsigned short q_count; // number of question entries
-    unsigned short ans_count; // number of answer entries
-    unsigned short auth_count; // number of authority entries
-    unsigned short add_count; // number of resource entries
-} dnshdr_t;
+}
 
 FILE *logfile;
 struct sockaddr_in source,dest;
-// int tcp=0,udp=0,icmp=0,others=0,igmp=0,total=0,i,j; 
+// int tcp=0,udp=0,icmp=0,others=0,igmp=0,total=0,i,j;
 int total=0;
 // int num = 0;
 char str[50];
@@ -95,28 +74,28 @@ void PrintData (unsigned char* data , int Size)
                 	// fprintf(logfile, "hello");
                     fprintf(logfile , "%c", (unsigned char)data[j]); //if its a number or alphabet
                 }
-                 
+
                 else fprintf(logfile , "."); //otherwise print a dot
             }
             // fprintf(logfile , "\n");
-        } 
-         
+        }
+
         // if(i%16==0) fprintf(logfile , "   ");
-        
+
         // fprintf(logfile , " %02X", (unsigned int)data[i]);
-                 
+
         if( i==Size-1)  //print the last spaces
         {
-            // for(j=0;j<15-i%16;j++) 
+            // for(j=0;j<15-i%16;j++)
             // {
             //   fprintf(logfile , "   "); //extra spaces
             // }
-             
+
             // fprintf(logfile , "         ");
-             
+
             for(j=i-i%16 ; j<=i ; j++)
             {
-                if(data[j]>=32 && data[j]<=128) 
+                if(data[j]>=32 && data[j]<=128)
                 {
                 	// fprintf(logfile, "hello");
 
@@ -127,7 +106,7 @@ void PrintData (unsigned char* data , int Size)
                   fprintf(logfile , ".");
                 }
             }
-             
+
             // fprintf(logfile ,  "\n" );
         }
     }
@@ -154,7 +133,7 @@ void print_TCP_Header (struct tcphdr *tcph)
     fprintf(logfile , "   |-Checksum       : %d\n",ntohs(tcph->check));
     fprintf(logfile , "   |-Urgent Pointer : %d\n",tcph->urg_ptr);
     fprintf(logfile , "\n");
-    
+
     return;
 }
 //print_IP_header
@@ -214,7 +193,7 @@ void print_DNS_Header (struct dnshdr *dnsh)
 //     fprintf(logfile , "   |-Source Address      : %d\n" , ntohs(ip6h->ip6_src));
 //     fprintf(logfile , "   |-Destination Address : %d\n" , ntohs(ip6h->ip6_dst));
 //     fprintf(logfile , "   |-Version             : 6\n" );
-//     //union 
+//     //union
 //     //if(  =sizeof(ip6_hdrctl))
 //     fprintf(logfile , "   |-Flow Label          : %d\n" , ntohs(ip6h-> ip6_ctlun->ip6_hdrctl->ip6_un1_flow));
 //     fprintf(logfile , "   |-Payload Length      : %d\n" , ntohs(ip6h-> ip6_ctlun->ip6_hdrctl->ip6_un1_plen));
@@ -230,7 +209,7 @@ static void process_tcp_dns(struct tcphdr *hdr) {
     // printf("Size of TCP header: %d\n", sizeof(struct tcphdr));
 	unsigned short src_port = ntohs(hdr->source);
 	unsigned short dst_port = ntohs(hdr->dest);
-    
+
     if (src_port == 53 || dst_port == 53) {
             dns++;
             fprintf(logfile , "Packet type: DNS\n");
@@ -243,9 +222,9 @@ static void process_tcp_dns(struct tcphdr *hdr) {
             fprintf(logfile , "\n");
             fprintf(logfile , "DNS message\n");
             // PrintData(buffer + hdrsize, size-hdrsize);
-            print_DNS_Header(shdr); 
+            print_DNS_Header(shdr);
             fprintf(logfile , "\n");
-        }              
+        }
 }
 
 static void process_udp_dns(struct udphdr *hdr) {
@@ -253,9 +232,9 @@ static void process_udp_dns(struct udphdr *hdr) {
 
     unsigned short src_port;
     unsigned short dst_port;
-   
-    src_port = ntohs(hdr->source);
-    dst_port = ntohs(hdr->dest);
+
+    src_port = ntohs(hdr->uh_sport);
+    dst_port = ntohs(hdr->uh_dport);
     int hdrsize;
 
     /* sanity check - dns using port 53 */
@@ -268,17 +247,19 @@ static void process_udp_dns(struct udphdr *hdr) {
         // printf("Size of DNS: %d\n", sizeof(struct dnshdr));
         // int size = sizeof(buffer) - (sizeof(struct dnshdr) + sizeof(struct tcphdr) + sizeof(struct ether_header) + sizeof(struct iphdr));
         // printf("Size of payload: %d\n", size);
-        
+
         dns_hdr = (struct dnshdr *)((char *)hdr + sizeof(struct udphdr));
         fprintf(logfile , "\n");
         fprintf(logfile , "DNS message\n");
 
-        print_DNS_Header(dns_hdr); 
+        print_DNS_Header(dns_hdr);
+        parse_dns_response(dns_hdr);
+
         fprintf(logfile , "\n");
     }
-            // print_DNS(shdr);  
-                                
-            // printf("DNS\n");                    
+            // print_DNS(shdr);
+
+            // printf("DNS\n");
 }
 
 static void process_ipv4_packet(unsigned char* buffer, int size) {
@@ -309,7 +290,7 @@ static void process_ipv6_packet(unsigned char* buffer, int size) {
 
     ipv6++;
     struct ip6_hdr *ip6h;
-    struct tcphdr *tcphdr; 
+    struct tcphdr *tcphdr;
     struct udphdr *udphdr;
 
     ip6h  = (struct ip6_hdr *)(buffer+ sizeof(struct ether_header));
@@ -333,7 +314,7 @@ static void process_ipv6_packet(unsigned char* buffer, int size) {
 }
 
 static void process_packet(void *buffer, int size) {
-    
+
     struct ether_header *eth;
     struct ip *ip;
     struct tcphdr *tcp;
@@ -341,7 +322,7 @@ static void process_packet(void *buffer, int size) {
     struct in_addr addr;
 
 	eth = (struct ether_header*)(buffer);
-    
+
     ++total;
 
     //Get the IP Header part of this packet , excluding the ethernet header
@@ -350,11 +331,11 @@ static void process_packet(void *buffer, int size) {
         case ETHERTYPE_IP:  //IPv4 Protocol
             process_ipv4_packet(buffer,size);
             break;
-         
+
         case ETHERTYPE_IPV6:    //IPv6 Protocol
             process_ipv6_packet(buffer,size);
             break;
-         
+
         default: //Some Other Protocol - should not get here
             break;
     }
@@ -369,7 +350,7 @@ int main()
     if (init_dns_socket()) return 1;
 
     logfile=fopen("log.txt","w");
-    if(logfile==NULL) 
+    if(logfile==NULL)
     {
         printf("Unable to create log.txt file.");
     }

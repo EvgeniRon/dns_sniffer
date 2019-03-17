@@ -1,19 +1,27 @@
 #include "dns.h"
+#include "stdio.h"
 
 void parse_dns_response(void *buffer) {
+
+	char *domain_name;
 
     //unsigned char *seek_ptr = buffer;
     dnshdr_t *dns_header = (dnshdr_t *)buffer;
     unsigned int num_questions = ntohs(dns_header->qdcount);
     unsigned int num_answers = ntohs(dns_header->ancount);
-    
+
     query_t *query = buffer + sizeof(dnshdr_t);
     resource_record_t *answer;
 
     query->qname_length = strlen(query->qname_length) + 1;
     query->question = query->qname + query->qname_length;
-    
-    
+
+	domain_name = parse_query_name(query->qname, query->qname_length);
+	printf(domain_name);
+	free(domain_name);
+	return;
+}
+/*
 
 
 	//move ahead of the dns header and the query field
@@ -22,7 +30,7 @@ void parse_dns_response(void *buffer) {
 	printf("\nThe response contains : ");
 	printf("\n %d Questions.",ntohs(dns->q_count));
 	printf("\n %d Answers.",ntohs(dns->ans_count));
-	
+
 
 	//Start reading answers
 	stop=0;
@@ -106,8 +114,8 @@ void parse_dns_response(void *buffer) {
 			a.sin_addr.s_addr=(*p); //working without ntohl
 			printf("has IPv4 address : %s",inet_ntoa(a.sin_addr));
 		}
-		
-		if(ntohs(answers[i].resource->type)==5) 
+
+		if(ntohs(answers[i].resource->type)==5)
 		{
 			//Canonical name for an alias
 			printf("has alias name : %s",answers[i].rdata);
@@ -120,7 +128,7 @@ void parse_dns_response(void *buffer) {
 	printf("\nAuthoritive Records : %d \n" , ntohs(dns->auth_count) );
 	for( i=0 ; i < ntohs(dns->auth_count) ; i++)
 	{
-		
+
 		printf("Name : %s ",auth[i].name);
 		if(ntohs(auth[i].resource->type)==2)
 		{
@@ -145,54 +153,56 @@ void parse_dns_response(void *buffer) {
 	}
 	return;
 }
+*/
+
 
 /*
- * 
+ *
  * */
-u_char* ReadName(unsigned char* reader,unsigned char* buffer,int* count)
-{
-	unsigned char *name;
-	unsigned int p=0,jumped=0,offset;
-	int i , j;
+static unsigned char *parse_query_name(unsigned char *name_field, int size) {
 
-	*count = 1;
-	name = (unsigned char*)malloc(256);
+	unsigned char *name = (unsigned char *)malloc(sizeof(char) * size);
+	unsigned char count = 0;
+	int i = 0;
 
-	name[0]='\0';
-
-	//read the names in 3www6google3com format
-	while(*reader!=0)
-	{
-		if(*reader>=192)
-		{
-			offset = (*reader)*256 + *(reader+1) - 49152; //49152 = 11000000 00000000 ;)
-			reader = buffer + offset - 1;
-			jumped = 1; //we have jumped to another location so counting wont go up!
-		}
-		else
-		{
-			name[p++]=*reader;
-		}
-
-		reader = reader+1;
-
-		if(jumped==0)
-		{
-			*count = *count + 1; //if we havent jumped to another location then we can count up
-		}
+	if(size == 0) {
+		return NULL;
 	}
 
-	name[p]='\0'; //string complete
-	if(jumped==1)
-	{
-		*count = *count + 1; //number of steps we actually moved forward in the packet
+	if(*name_field >= COMPRESSED_PTR) {
+		//TODO: Implement copressed name format
+		fprintf(stderr, "Compressed name - unsupported\n");
+		return NULL;
 	}
 
+	count = *name_field;
+	name_field++;
+
+	//read the names in 3www6google3com forma
+	while(*name_field) {
+
+		if (count == 0) {
+			count = *name_field;
+			if (count = 0) { // Reached end of line
+				name[i] = '\0';
+			}
+			name[i] = '.';
+		}
+		else {
+			count--;
+			name[i] = *name_field;
+		}
+		name_field++;
+	}
+	return name;
+}
+
+/*
 	//now convert 3www6google3com0 to www.google.com
-	for(i=0;i<(int)strlen((const char*)name);i++) 
+	for(i=0;i<(int)strlen((const char*)name);i++)
 	{
 		p=name[i];
-		for(j=0;j<(int)p;j++) 
+		for(j=0;j<(int)p;j++)
 		{
 			name[i]=name[i+1];
 			i=i+1;
@@ -202,3 +212,4 @@ u_char* ReadName(unsigned char* reader,unsigned char* buffer,int* count)
 	name[i-1]='\0'; //remove the last dot
 	return name;
 }
+*/

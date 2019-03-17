@@ -1,7 +1,12 @@
 #ifndef DNS_H
 #define DNS_H
 
-//DNS header structure
+#define COMPRESSED_PTR 192 //0b11000000
+
+/* DNS header packed structure
+ * Host byte order implementation
+ * Bit fields are used
+ */
 typedef struct dnshdr {
 	unsigned short id; // identification number
 
@@ -46,7 +51,7 @@ typedef struct resource_record {
 	unsigned char *rdata;
 } resource_record_t;
 
-/* Structure of a Query section 
+/* Structure of a Query section
  * The size is incorrect because the qname field does not have a constant size
  */
 typedef struct query {
@@ -54,5 +59,7 @@ typedef struct query {
 	unsigned int qname_length;
 	question_const_fields_t *question;
 } query_t;
+
+void parse_dns_response(void *buffer);
 
 #endif //DNS_H
