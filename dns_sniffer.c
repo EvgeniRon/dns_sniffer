@@ -178,11 +178,10 @@ void print_DNS_Header (struct dnshdr *dnsh)
     fprintf(logfile , "   |-Checking Disabled          : %d\n",(unsigned int)dnsh->cd);
     fprintf(logfile , "   |-Authenticated data         : %d\n",(unsigned int)dnsh->ad);
     fprintf(logfile , "   |-Recursion available        : %d\n",(unsigned int)dnsh->ra);
-    fprintf(logfile , "   |-Number of question entries : %d\n",(dnsh->q_count));
-    fprintf(logfile , "   |-Number of answer entries   : %d\n",(dnsh->ans_count));
-    fprintf(logfile , "   |-Number of authority entries: %d\n",dnsh->auth_count);
-    fprintf(logfile , "   |-Number of resource entries : %d\n",dnsh->add_count);
-    fprintf(logfile , "   |-Number of resource entries : %d\n",dnsh->add_count);
+    fprintf(logfile , "   |-Number of question entries : %d\n",dnsh->qdcount);
+    fprintf(logfile , "   |-Number of answer entries   : %d\n",dnsh->ancount);
+    fprintf(logfile , "   |-Number of authority entries: %d\n",dnsh->nscount);
+    fprintf(logfile , "   |-Number of resource entries : %d\n",dnsh->arcount);
     fprintf(logfile , "\n");
     return;
 }
