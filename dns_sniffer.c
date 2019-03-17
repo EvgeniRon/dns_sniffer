@@ -42,7 +42,7 @@ void  INThandler(int sig)
     printf("TCP: %d\n", tcp);
     printf("UDP: %d\n", udp);
     printf("ipv4: %d\n", ipv4);
-    printf("ipv6: %ld\n", ipv6);
+    printf("ipv6: %l\n", ipv6);
     printf("ARP: %d\n", arp);
     printf("HTTP: %d\n", http);
     printf("DNS: %d\n", dns);
@@ -293,7 +293,7 @@ static void process_ipv6_packet(unsigned char* buffer, int size) {
     struct udphdr *udphdr;
 
     ip6h  = (struct ip6_hdr *)(buffer+ sizeof(struct ether_header));
-    printf("Size of ipv6 header: %d\n", sizeof(struct ip6_hdr));
+    printf("Size of ipv6 header: %ld\n", sizeof(struct ip6_hdr));
 
     switch (ntohs(ip6h->ip6_nxt))
     {
