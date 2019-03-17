@@ -38,11 +38,11 @@ void  INThandler(int sig)
 
      signal(sig, SIG_IGN);
     clock_t CPU_time_2 = clock();
-    printf("CPU end time is : %d\n", CPU_time_2);
+    printf("CPU end time is : %ld\n", CPU_time_2);
     printf("TCP: %d\n", tcp);
     printf("UDP: %d\n", udp);
     printf("ipv4: %d\n", ipv4);
-    printf("ipv6: %d\n", ipv6);
+    printf("ipv6: %ld\n", ipv6);
     printf("ARP: %d\n", arp);
     printf("HTTP: %d\n", http);
     printf("DNS: %d\n", dns);
@@ -357,7 +357,7 @@ int main()
     printf("Starting...\n");
 
     clock_t CPU_time_1 = clock();
-    printf("CPU start time is : %d \n", CPU_time_1);
+    printf("CPU start time is : %ld \n", CPU_time_1);
 
     signal(SIGINT, INThandler);
     run_sniffer(process_packet);
