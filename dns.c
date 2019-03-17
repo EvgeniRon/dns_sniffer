@@ -41,6 +41,7 @@ static unsigned char *parse_query_name(unsigned char *name_field, int size) {
 			name[i] = *name_field;
 		}
 		name_field++;
+		i++;
 	}
 	return name;
 }
@@ -55,9 +56,11 @@ void parse_dns_response(void *buffer) {
     unsigned int num_answers = ntohs(dns_header->ancount);
 
     query_t *query = buffer + sizeof(dnshdr_t);
+    query->qname = (unsigned char *)query;
+
     resource_record_t *answer;
 
-    query->qname_length = strlen(query->qname) + 1;
+    query->qname_length = strlen((const char*)query->qname) + 1;
     query->question = (question_const_fields_t *)(query->qname + query->qname_length);
 
 	domain_name = parse_query_name(query->qname, query->qname_length);
