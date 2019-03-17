@@ -1,5 +1,48 @@
 #include "dns.h"
 #include "stdio.h"
+#include <string.h>
+#include <arpa/inet.h>
+
+/*
+ *
+ * */
+static unsigned char *parse_query_name(unsigned char *name_field, int size) {
+
+	unsigned char *name = (unsigned char *)malloc(sizeof(char) * size);
+	unsigned char count = 0;
+	int i = 0;
+
+	if(size == 0) {
+		return NULL;
+	}
+
+	if(*name_field >= COMPRESSED_PTR) {
+		//TODO: Implement copressed name format
+		fprintf(stderr, "Compressed name - unsupported\n");
+		return NULL;
+	}
+
+	count = *name_field;
+	name_field++;
+
+	//read the names in 3www6google3com forma
+	while(*name_field) {
+
+		if (count == 0) {
+			count = *name_field;
+			if (count = 0) { // Reached end of line
+				name[i] = '\0';
+			}
+			name[i] = '.';
+		}
+		else {
+			count--;
+			name[i] = *name_field;
+		}
+		name_field++;
+	}
+	return name;
+}
 
 void parse_dns_response(void *buffer) {
 
@@ -13,8 +56,8 @@ void parse_dns_response(void *buffer) {
     query_t *query = buffer + sizeof(dnshdr_t);
     resource_record_t *answer;
 
-    query->qname_length = strlen(query->qname_length) + 1;
-    query->question = query->qname + query->qname_length;
+    query->qname_length = strlen(query->qname) + 1;
+    query->question = (question_const_fields_t *)(query->qname + query->qname_length);
 
 	domain_name = parse_query_name(query->qname, query->qname_length);
 	printf(domain_name);
@@ -154,48 +197,6 @@ void parse_dns_response(void *buffer) {
 	return;
 }
 */
-
-
-/*
- *
- * */
-static unsigned char *parse_query_name(unsigned char *name_field, int size) {
-
-	unsigned char *name = (unsigned char *)malloc(sizeof(char) * size);
-	unsigned char count = 0;
-	int i = 0;
-
-	if(size == 0) {
-		return NULL;
-	}
-
-	if(*name_field >= COMPRESSED_PTR) {
-		//TODO: Implement copressed name format
-		fprintf(stderr, "Compressed name - unsupported\n");
-		return NULL;
-	}
-
-	count = *name_field;
-	name_field++;
-
-	//read the names in 3www6google3com forma
-	while(*name_field) {
-
-		if (count == 0) {
-			count = *name_field;
-			if (count = 0) { // Reached end of line
-				name[i] = '\0';
-			}
-			name[i] = '.';
-		}
-		else {
-			count--;
-			name[i] = *name_field;
-		}
-		name_field++;
-	}
-	return name;
-}
 
 /*
 	//now convert 3www6google3com0 to www.google.com
