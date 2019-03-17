@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-I. -g
 DEPS = socket.h
-OBJ = dns_sniffer.o socket.o 
+OBJ = dns_sniffer.o socket.o dns.o
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
