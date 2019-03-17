@@ -42,7 +42,7 @@ void  INThandler(int sig)
     printf("TCP: %d\n", tcp);
     printf("UDP: %d\n", udp);
     printf("ipv4: %d\n", ipv4);
-    printf("ipv6: %l\n", ipv6);
+    printf("ipv6: %d\n", ipv6);
     printf("ARP: %d\n", arp);
     printf("HTTP: %d\n", http);
     printf("DNS: %d\n", dns);
