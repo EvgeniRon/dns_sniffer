@@ -2,6 +2,8 @@
 #define DNS_H
 
 #define COMPRESSED_PTR 192 //0b11000000
+#define TYPE_A 1
+#define TYPE_AAAA 28
 
 /* DNS header packed structure
  * Host byte order implementation

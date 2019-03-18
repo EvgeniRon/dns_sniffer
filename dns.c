@@ -5,8 +5,9 @@
 #include "dns.h"
 
 /*
- *
- * */
+ * Parse the name field in DNS Resource Record
+ * 
+*/
 static unsigned char *parse_query_name(unsigned char *name_field, int size) {
 
 	unsigned char *name = (unsigned char *)malloc(sizeof(char) * size);
@@ -18,7 +19,7 @@ static unsigned char *parse_query_name(unsigned char *name_field, int size) {
 	}
 
 	if(*name_field >= COMPRESSED_PTR) {
-		//TODO: Implement copressed name format
+		//TODO: Implement compressed name format
 		fprintf(stderr, "Compressed name - unsupported\n");
 		return NULL;
 	}
@@ -26,15 +27,17 @@ static unsigned char *parse_query_name(unsigned char *name_field, int size) {
 	count = *name_field;
 	name_field++;
 
-	//read the names in 3www6google3com forma
-	while(*name_field) {
+	//read the names in 3www6google3com format
+	while(i<size) {
 
 		if (count == 0) {
 			count = *name_field;
-			if (count = 0) { // Reached end of line
+			if (count == 0) { // Reached end of line
 				name[i] = '\0';
 			}
-			name[i] = '.';
+			else {
+				name[i] = '.';
+			}
 		}
 		else {
 			count--;
@@ -46,175 +49,71 @@ static unsigned char *parse_query_name(unsigned char *name_field, int size) {
 	return name;
 }
 
+static void parse_answer(unsigned char* name, int num_answers) {
+	resource_record_t answer;
+	void *ip_buffer;
+	char str[INET6_ADDRSTRLEN];
+	
+	answer.name = name;
+	// Get the resolved IP from the answer
+	for (int i = 0; i < num_answers; i++) {
+		// Point to the constant sized fields
+		if(*(answer.name) >= COMPRESSED_PTR) {
+			answer.resource = (rr_const_fields_t *)(answer.name + sizeof(short));
+		} 
+		else {
+			answer.resource = (rr_const_fields_t *)(answer.name + strlen((const char*)answer.name) + 1);
+		}
+
+		ip_buffer = (void *)((char *)answer.resource + sizeof(rr_const_fields_t));
+		
+		if(ntohs(answer.resource->type == TYPE_A)) {
+			inet_ntop(AF_INET, ip_buffer, str, INET_ADDRSTRLEN);
+			printf("resolved ip: %s\n", str);
+		}
+		else if(ntohs(answer.resource->type == TYPE_AAAA)) {
+			inet_ntop(AF_INET6, ip_buffer, str, INET6_ADDRSTRLEN);
+			printf("resolved ip: %s\n", str);
+		}
+		else {
+			answer.name =(unsigned char *)answer.resource + sizeof(rr_const_fields_t) + ntohs(answer.resource->data_len);
+		}
+	}
+}
+
 void parse_dns_response(void *buffer) {
 
-	char *domain_name;
+	query_t query;
+    resource_record_t answer;
+	unsigned char *domain_name;
+	int type;
 
-    //unsigned char *seek_ptr = buffer;
     dnshdr_t *dns_header = (dnshdr_t *)buffer;
     unsigned int num_questions = ntohs(dns_header->qdcount);
     unsigned int num_answers = ntohs(dns_header->ancount);
+	printf("DNS ID: %x\n", ntohs(dns_header->id));
+	// Point to the QNAME field in the Query section
+    query.qname = (unsigned char *)buffer + sizeof(dnshdr_t);
 
-    query_t *query = buffer + sizeof(dnshdr_t);
-    query->qname = (unsigned char *)query;
+	// The QNAME field length
+	query.qname_length = strlen((const char*)query.qname) + 1;
 
-    resource_record_t *answer;
+	// Point to the QTYPE and QCLASS fields
+    query.question = (question_const_fields_t *)(query.qname + query.qname_length);
 
-    query->qname_length = strlen((const char*)query->qname) + 1;
-    query->question = (question_const_fields_t *)(query->qname + query->qname_length);
+	// We are interested only in type A (ipv4) and type AAAA (ipv6)
+	type = ntohs(query.question->qtype);
+	if (type == TYPE_A || type == TYPE_AAAA) {
+		
+		// Get the domain name from the query
+		domain_name = parse_query_name(query.qname, query.qname_length);
+		printf("domain name: %s\n", domain_name);
 
-	domain_name = parse_query_name(query->qname, query->qname_length);
-	printf("domain name: %s\n", domain_name);
-	free(domain_name);
-	return;
-}
-/*
-
-
-	//move ahead of the dns header and the query field
-// &buf[sizeof(struct DNS_HEADER) + (strlen((const char*)qname)+1) + sizeof(struct QUESTION)];
-
-	printf("\nThe response contains : ");
-	printf("\n %d Questions.",ntohs(dns->q_count));
-	printf("\n %d Answers.",ntohs(dns->ans_count));
-
-
-	//Start reading answers
-	stop=0;
-
-	for(i=0;i<ntohs(dns->ans_count);i++)
-	{
-		answers[i].name=ReadName(reader,buf,&stop);
-		reader = reader + stop;
-
-		answers[i].resource = (struct R_DATA*)(reader);
-		reader = reader + sizeof(struct R_DATA);
-
-		if(ntohs(answers[i].resource->type) == 1) //if its an ipv4 address
-		{
-			answers[i].rdata = (unsigned char*)malloc(ntohs(answers[i].resource->data_len));
-
-			for(j=0 ; j<ntohs(answers[i].resource->data_len) ; j++)
-			{
-				answers[i].rdata[j]=reader[j];
-			}
-
-			answers[i].rdata[ntohs(answers[i].resource->data_len)] = '\0';
-
-			reader = reader + ntohs(answers[i].resource->data_len);
-		}
-		else
-		{
-			answers[i].rdata = ReadName(reader,buf,&stop);
-			reader = reader + stop;
-		}
-	}
-
-	//read authorities
-	for(i=0;i<ntohs(dns->auth_count);i++)
-	{
-		auth[i].name=ReadName(reader,buf,&stop);
-		reader+=stop;
-
-		auth[i].resource=(struct R_DATA*)(reader);
-		reader+=sizeof(struct R_DATA);
-
-		auth[i].rdata=ReadName(reader,buf,&stop);
-		reader+=stop;
-	}
-
-	//read additional
-	for(i=0;i<ntohs(dns->add_count);i++)
-	{
-		addit[i].name=ReadName(reader,buf,&stop);
-		reader+=stop;
-
-		addit[i].resource=(struct R_DATA*)(reader);
-		reader+=sizeof(struct R_DATA);
-
-		if(ntohs(addit[i].resource->type)==1)
-		{
-			addit[i].rdata = (unsigned char*)malloc(ntohs(addit[i].resource->data_len));
-			for(j=0;j<ntohs(addit[i].resource->data_len);j++)
-			addit[i].rdata[j]=reader[j];
-
-			addit[i].rdata[ntohs(addit[i].resource->data_len)]='\0';
-			reader+=ntohs(addit[i].resource->data_len);
-		}
-		else
-		{
-			addit[i].rdata=ReadName(reader,buf,&stop);
-			reader+=stop;
-		}
-	}
-
-	//print answers
-	printf("\nAnswer Records : %d \n" , ntohs(dns->ans_count) );
-	for(i=0 ; i < ntohs(dns->ans_count) ; i++)
-	{
-		printf("Name : %s ",answers[i].name);
-
-		if( ntohs(answers[i].resource->type) == T_A) //IPv4 address
-		{
-			long *p;
-			p=(long*)answers[i].rdata;
-			a.sin_addr.s_addr=(*p); //working without ntohl
-			printf("has IPv4 address : %s",inet_ntoa(a.sin_addr));
-		}
-
-		if(ntohs(answers[i].resource->type)==5)
-		{
-			//Canonical name for an alias
-			printf("has alias name : %s",answers[i].rdata);
-		}
-
-		printf("\n");
-	}
-
-	//print authorities
-	printf("\nAuthoritive Records : %d \n" , ntohs(dns->auth_count) );
-	for( i=0 ; i < ntohs(dns->auth_count) ; i++)
-	{
-
-		printf("Name : %s ",auth[i].name);
-		if(ntohs(auth[i].resource->type)==2)
-		{
-			printf("has nameserver : %s",auth[i].rdata);
-		}
-		printf("\n");
-	}
-
-	//print additional resource records
-	printf("\nAdditional Records : %d \n" , ntohs(dns->add_count) );
-	for(i=0; i < ntohs(dns->add_count) ; i++)
-	{
-		printf("Name : %s ",addit[i].name);
-		if(ntohs(addit[i].resource->type)==1)
-		{
-			long *p;
-			p=(long*)addit[i].rdata;
-			a.sin_addr.s_addr=(*p);
-			printf("has IPv4 address : %s",inet_ntoa(a.sin_addr));
-		}
-		printf("\n");
+		answer.name = (unsigned char *)query.question + sizeof(question_const_fields_t);
+		parse_answer(answer.name, num_answers);
+		printf("-- END OF RECORD --\n\n");
+		
+		free(domain_name);
 	}
 	return;
 }
-*/
-
-/*
-	//now convert 3www6google3com0 to www.google.com
-	for(i=0;i<(int)strlen((const char*)name);i++)
-	{
-		p=name[i];
-		for(j=0;j<(int)p;j++)
-		{
-			name[i]=name[i+1];
-			i=i+1;
-		}
-		name[i]='.';
-	}
-	name[i-1]='\0'; //remove the last dot
-	return name;
-}
-*/
