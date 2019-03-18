@@ -2,54 +2,119 @@
 #include <string.h>
 #include <stdlib.h>
 #include <arpa/inet.h>
+#include<netinet/in.h>
 #include "dns.h"
 
 /*
  * Parse the name field in DNS Resource Record
- * 
+ * Converts a compressed domain name to the human-readable form 
 */
-static unsigned char *parse_query_name(unsigned char *name_field, int size) {
+static int parse_name(char *dns_packet, char *seek_ptr, char *name, unsigned int name_max_length) {
+	int slen;			// Length of current segment
+	int clen = 0;		// Total length of compressed name
+	int jumped = 0;		// Set if jumped to pointer
+	int nseg = 0;		// Total number of label in name
 
-	unsigned char *name = (unsigned char *)malloc(sizeof(char) * size);
-	unsigned char count = 0;
-	int i = 0;
-
-	if(size == 0) {
-		return NULL;
-	}
-
-	if(*name_field >= COMPRESSED_PTR) {
-		//TODO: Implement compressed name format
-		fprintf(stderr, "Compressed name - unsupported\n");
-		return NULL;
-	}
-
-	count = *name_field;
-	name_field++;
-
-	//read the names in 3www6google3com format
-	while(i<size) {
-
-		if (count == 0) {
-			count = *name_field;
-			if (count == 0) { // Reached end of line
-				name[i] = '\0';
-			}
-			else {
-				name[i] = '.';
-			}
+	for(;;) {
+		slen = *seek_ptr++;				// Length of this segment
+		
+		if (!jumped) {
+			clen++;
 		}
-		else {
-			count--;
-			name[i] = *name_field;
+		
+		// Compressed pointer
+		if ((slen & 0xc0) == 0xc0) {
+			seek_ptr = &dns_packet[((slen & 0x3f)<<8) + *seek_ptr];	// Follow compressed poimter
+			if(!jumped) {
+				clen++;
+			}	
+			jumped = 1;			
+			slen = *seek_ptr++;
 		}
-		name_field++;
-		i++;
+
+		if (slen == 0) {
+			break;	// zero length == all done
+		}			
+
+		if (!jumped) {
+			clen += slen;
+		} 
+
+		if((name_max_length -= slen+1) < 0)
+		{
+			return 0;
+		}
+		
+		while (slen-- != 0) {
+			*name++ = *seek_ptr++;
+		}
+
+		*name++ = '.';
+
+		nseg++;
 	}
-	return name;
+
+	if(nseg == 0) {
+		*name++ = '.';				// Root name; represent as single dot
+	}	
+	else {
+		--name;
+	} 
+
+	*name = '\0';
+
+	return clen; // Length of compressed message
 }
 
-static void parse_answer(unsigned char* name, int num_answers) {
+static void parse_query(char *dns_packet, char *seek_ptr, query_t *query) {
+	
+	char qname[MAX_NAME_LEN];
+
+	query->qname_length = parse_name(dns_packet,seek_ptr, &qname[0], sizeof(qname));
+	query->qname = malloc(sizeof(char) * query->qname_length);
+	memcpy(query->qname, &qname, query->qname_length);
+
+	// Point to the QTYPE and QCLASS fields
+    query->question = (question_const_fields_t *)(seek_ptr + query->qname_length);
+	
+	return;
+}
+
+static void parse_answer(char *dns_packet, char *seek_ptr, resource_record_t *answer) {
+	char name[MAX_NAME_LEN];
+	char str[INET_ADDRSTRLEN];
+	int type;
+	unsigned long tip;
+
+	answer->name_length = parse_name(dns_packet, seek_ptr, &name[0], sizeof(name));
+	answer->name = malloc(sizeof(char) * answer->name_length);
+	memcpy(answer->name, &name, answer->name_length);
+
+	seek_ptr += answer->name_length;
+	answer->resource = (rr_const_fields_t *)seek_ptr;
+
+	seek_ptr += sizeof(rr_const_fields_t);
+	answer->rdata = (unsigned char *)seek_ptr;
+
+	type = ntohs(answer->resource->type);
+	switch(type) {
+		case TYPE_A:
+			tip = 0;
+			//*(((unsigned char *)&tip) + 3) = *answer->rdata++;
+			//*(((unsigned char *)&tip) + 2) = *answer->rdata++;
+			//*(((unsigned char *)&tip) + 1) = *answer->rdata++;
+			//*((unsigned char *)&tip) = *answer->rdata++;			// Network odering
+			printf("RRs : TYPE_A = %s", inet_ntop(AF_INET, answer->rdata, str, INET_ADDRSTRLEN));
+			break;	
+	}
+
+}
+/*
+static void parse_answer(char *dns_packet, char *seek_ptr, resource_record_t *answer) {
+	
+	
+	
+	
 	resource_record_t answer;
 	void *ip_buffer;
 	char str[INET6_ADDRSTRLEN];
@@ -80,40 +145,42 @@ static void parse_answer(unsigned char* name, int num_answers) {
 		}
 	}
 }
-
-void parse_dns_response(void *buffer) {
+*/
+void parse_dns_response(void *dns_packet) {
 
 	query_t query;
     resource_record_t answer;
-	unsigned char *domain_name;
+	char *current;
 	int type;
 
-    dnshdr_t *dns_header = (dnshdr_t *)buffer;
-    unsigned int num_questions = ntohs(dns_header->qdcount);
-    unsigned int num_answers = ntohs(dns_header->ancount);
-	printf("DNS ID: %x\n", ntohs(dns_header->id));
-	// Point to the QNAME field in the Query section
-    query.qname = (unsigned char *)buffer + sizeof(dnshdr_t);
+    dnshdr_t *dns_header = (dnshdr_t *)dns_packet;
+	int id = ntohs(dns_header->id);
+    int num_questions = ntohs(dns_header->qdcount);
+    int num_answers = ntohs(dns_header->ancount);
+	printf("DNS ID: %x\n", id);
+	
+	// Point to the Query section
+    current = (char *)dns_packet + sizeof(dnshdr_t);
 
-	// The QNAME field length
-	query.qname_length = strlen((const char*)query.qname) + 1;
+	parse_query(dns_packet, current, &query);
 
-	// Point to the QTYPE and QCLASS fields
-    query.question = (question_const_fields_t *)(query.qname + query.qname_length);
-
-	// We are interested only in type A (ipv4) and type AAAA (ipv6)
 	type = ntohs(query.question->qtype);
 	if (type == TYPE_A || type == TYPE_AAAA) {
 		
-		// Get the domain name from the query
-		domain_name = parse_query_name(query.qname, query.qname_length);
-		printf("domain name: %s\n", domain_name);
+		printf("domain name: %s\n", query.qname);
 
-		answer.name = (unsigned char *)query.question + sizeof(question_const_fields_t);
-		parse_answer(answer.name, num_answers);
-		printf("-- END OF RECORD --\n\n");
+		// point to the answer section
+		current += query.qname_length +sizeof(question_const_fields_t);
+
+		parse_answer(dns_packet, current, &answer);
 		
-		free(domain_name);
+//		parse_answer(answer.name, num_answers);
+//		printf("-- END OF RECORD --\n\n");
+		
+//		free(domain_name);
 	}
+
+	free(query.qname);
+	free(answer.name);
 	return;
 }

@@ -1,6 +1,7 @@
 #ifndef DNS_H
 #define DNS_H
 
+#define MAX_NAME_LEN 253
 #define COMPRESSED_PTR 192 //0b11000000
 #define TYPE_A 1
 #define TYPE_AAAA 28
@@ -49,6 +50,7 @@ typedef struct rr_const_fields {
  */
 typedef struct resource_record {
 	unsigned char *name;
+	unsigned int name_length;
 	rr_const_fields_t *resource;
 	unsigned char *rdata;
 } resource_record_t;
