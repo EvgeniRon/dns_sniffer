@@ -1,6 +1,7 @@
 #ifndef DNS_H
 #define DNS_H
 
+#define MAX_SEGMENT_LENGTH 63
 #define MAX_NAME_LEN 253
 #define COMPRESSED_PTR 192 //0b11000000
 #define TYPE_A 1
@@ -44,6 +45,9 @@ typedef struct rr_const_fields {
 	unsigned int ttl;
 	unsigned short data_len;
 } rr_const_fields_t;
+
+// Alighment issues - use the following define for size of rr_const_fields_t struct
+#define RR_CONST_FIELDS_SIZE 10
 
 /* Structure of a resource record
  * The size is incorrect because the qname field does not have a constant size

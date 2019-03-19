@@ -11,7 +11,7 @@
 /* Max size of buffer */
 #define MAX_PACKET_SIZE 65536
 
-/* Linux socket filter (or BPF) code for filtering DNS response packets 
+/* Linux socket filter (or BPF) code for filtering out everything but DNS response packets 
  * tcpdump 'port 53 and ((udp and (not udp[10] & 128 = 0)) or \
  * (tcp and (not tcp[((tcp[12] & 0xf0) >> 2) + 2] & 128 = 0)))' -dd
  * 
@@ -74,12 +74,14 @@ static int raw_socket;
 
 int init_dns_socket() {
     
+    // Open raw socket
     raw_socket = socket( AF_PACKET , SOCK_RAW , htons(ETH_P_ALL));
     if(raw_socket == -1) {
         perror("Socket error");
         return EXIT_FAILURE;
     }
 
+    // Send our compiled LSF filter to kernel
     if(setsockopt(raw_socket, SOL_SOCKET, SO_ATTACH_FILTER, &bpf, sizeof(bpf)) < 0) {
         perror("Filter error");
         return EXIT_FAILURE;

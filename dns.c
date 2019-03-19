@@ -24,12 +24,16 @@ static int parse_name(char *dns_packet, char *seek_ptr, char *name, unsigned int
 		
 		// Compressed pointer
 		if ((slen & 0xc0) == 0xc0) {
-			seek_ptr = &dns_packet[((slen & 0x3f)<<8) + *seek_ptr];	// Follow compressed poimter
+			seek_ptr = &dns_packet[((slen & 0x3f)<<8) + *seek_ptr];	// Follow compressed pointer
 			if(!jumped) {
 				clen++;
 			}	
 			jumped = 1;			
 			slen = *seek_ptr++;
+			if (slen > MAX_SEGMENT_LENGTH) {
+				fprintf(stderr, "Segment length error!\n");
+				return EXIT_FAILURE;
+			}
 		}
 
 		if (slen == 0) {
@@ -42,10 +46,11 @@ static int parse_name(char *dns_packet, char *seek_ptr, char *name, unsigned int
 
 		if((name_max_length -= slen+1) < 0)
 		{
+			fprintf(stderr,"Not enough memory");
 			return 0;
 		}
 		
-		while (slen-- != 0) {
+		while (slen-- > 0) {
 			*name++ = *seek_ptr++;
 		}
 
@@ -55,7 +60,7 @@ static int parse_name(char *dns_packet, char *seek_ptr, char *name, unsigned int
 	}
 
 	if(nseg == 0) {
-		*name++ = '.';				// Root name; represent as single dot
+		*name++ = '.';	// Root name; represent as single dot
 	}	
 	else {
 		--name;
@@ -66,30 +71,42 @@ static int parse_name(char *dns_packet, char *seek_ptr, char *name, unsigned int
 	return clen; // Length of compressed message
 }
 
-static void parse_query(char *dns_packet, char *seek_ptr, query_t *query) {
-	
+static int parse_query(char *dns_packet, char *seek_ptr, query_t *query) {
 	char qname[MAX_NAME_LEN];
 
 	query->qname_length = parse_name(dns_packet,seek_ptr, &qname[0], sizeof(qname));
+	if (query->qname_length == 0) {
+		fprintf(stderr, "Failed reading field name.\n");
+		return EXIT_FAILURE;
+	}
+
 	query->qname = malloc(sizeof(char) * query->qname_length);
 	memcpy(query->qname, &qname, query->qname_length);
 
 	// Point to the QTYPE and QCLASS fields
     query->question = (question_const_fields_t *)(seek_ptr + query->qname_length);
 	
-	return;
+	return EXIT_SUCCESS;
 }
 
-static void parse_answer(char *dns_packet, char *seek_ptr, resource_record_t *answer) {
+static int parse_answer(char *dns_packet, char *seek_ptr, resource_record_t *answer) {
 	char name[MAX_NAME_LEN];
-	char str[INET6_ADDRSTRLEN];
-	int type;
+	int uncompressed_name_length;
 
+	// Get the name and its length - the length may be smaller than the string itself (compressed pointer)
 	answer->name_length = parse_name(dns_packet, seek_ptr, &name[0], sizeof(name));
-	answer->name = malloc(sizeof(char) * answer->name_length);
-	memcpy(answer->name, &name, answer->name_length);
+	if (answer->name_length == 0) {
+		fprintf(stderr, "Failed reading field name.\n");
+		return EXIT_FAILURE;
+	}
 
-	seek_ptr = seek_ptr + answer->name_length;
+	uncompressed_name_length = strlen(name);
+	
+	answer->name = malloc(sizeof(char) * (uncompressed_name_length + 1));
+	memcpy(answer->name, &name, uncompressed_name_length);
+	answer->name[uncompressed_name_length] = '\0';
+
+	seek_ptr += answer->name_length; // Skip name field
 	answer->resource = (rr_const_fields_t *)seek_ptr;
 
 	seek_ptr += 2; // Skip Type field (2 bytes size)
@@ -97,85 +114,71 @@ static void parse_answer(char *dns_packet, char *seek_ptr, resource_record_t *an
 	seek_ptr += 4; // Skip TTL field (4 bytes)
 	seek_ptr += 2; // Skip RDLENGTH field (2 bytes)
 	answer->rdata = seek_ptr;
-
-	type = ntohs(answer->resource->type);
-	switch(type) {
-		case TYPE_A:
-			printf("RRs : TYPE_A (IPv4) = %s\n", inet_ntop(AF_INET, answer->rdata, str, INET_ADDRSTRLEN));
-			break;
-		case TYPE_AAAA:
-			printf("RRs : TYPE_AAAA (IPv6) %s\n", inet_ntop(AF_INET6, answer->rdata, str, INET6_ADDRSTRLEN));
-			break;
-	}
-
+	
+	return EXIT_SUCCESS;
 }
-/*
-static void parse_answer(char *dns_packet, char *seek_ptr, resource_record_t *answer) {
-	
-	
-	
-	
-	resource_record_t answer;
-	void *ip_buffer;
-	char str[INET6_ADDRSTRLEN];
-	
-	answer.name = name;
-	// Get the resolved IP from the answer
-	for (int i = 0; i < num_answers; i++) {
-		// Point to the constant sized fields
-		if(*(answer.name) >= COMPRESSED_PTR) {
-			answer.resource = (rr_const_fields_t *)(answer.name + sizeof(short));
-		} 
-		else {
-			answer.resource = (rr_const_fields_t *)(answer.name + strlen((const char*)answer.name) + 1);
-		}
 
-		ip_buffer = (void *)((char *)answer.resource + sizeof(rr_const_fields_t));
-		
-		if(ntohs(answer.resource->type == TYPE_A)) {
-			inet_ntop(AF_INET, ip_buffer, str, INET_ADDRSTRLEN);
-			printf("resolved ip: %s\n", str);
-		}
-		else if(ntohs(answer.resource->type == TYPE_AAAA)) {
-			inet_ntop(AF_INET6, ip_buffer, str, INET6_ADDRSTRLEN);
-			printf("resolved ip: %s\n", str);
-		}
-		else {
-			answer.name =(unsigned char *)answer.resource + sizeof(rr_const_fields_t) + ntohs(answer.resource->data_len);
-		}
-	}
-}
-*/
 void parse_dns_response(void *dns_packet) {
-
+	char ip_str[INET6_ADDRSTRLEN];
 	query_t query;
     resource_record_t answer;
 	char *current;
 	int type;
+	int ret;
 
     dnshdr_t *dns_header = (dnshdr_t *)dns_packet;
 	int id = ntohs(dns_header->id);
     int num_questions = ntohs(dns_header->qdcount);
     int num_answers = ntohs(dns_header->ancount);
-	
+
 	// Point to the Query section
     current = (char *)dns_packet + sizeof(dnshdr_t);
 
-	parse_query(dns_packet, current, &query);
+	ret = parse_query(dns_packet, current, &query);
+	if(ret == EXIT_FAILURE) {
+		return;
+	}
 
+	// Continue working on IP queries only
 	type = ntohs(query.question->qtype);
 	if (type == TYPE_A || type == TYPE_AAAA) {
-		
-		printf("domain name: %s\n", query.qname);
 
 		// point to the answer section
 		current = current + query.qname_length +sizeof(question_const_fields_t);
-
-		parse_answer(dns_packet, current, &answer);
 		
-		free(answer.name);
+		// loop through all the answers
+		for (int i = 0; i < num_answers; i++) {
+			ret = parse_answer(dns_packet, current, &answer);
+			if(ret == EXIT_FAILURE) {
+				return;
+			}
+			
+			// print only answers with IP
+			type = ntohs(answer.resource->type);
+			if (type == TYPE_A || type == TYPE_AAAA) {
+				printf("DNS Id: 0x%x:\nQuery domain name: %s\n", id, query.qname);
+				switch(type) {
+				case TYPE_A:
+					printf("Answer name: %s IPv4: %s\n",answer.name, inet_ntop(AF_INET, answer.rdata, ip_str, INET_ADDRSTRLEN));
+					break;
+				case TYPE_AAAA:
+					printf("Answer name: %s IPv6: %s\n", answer.name, inet_ntop(AF_INET6, answer.rdata, ip_str, INET6_ADDRSTRLEN));
+					break;
+				}
+			}
+
+			if (answer.name_length != 0) {
+				free(answer.name);
+				answer.name = NULL;
+			}
+
+			// Skip to next answer
+			current += answer.name_length + ntohs(answer.resource->data_len) + RR_CONST_FIELDS_SIZE;
+			answer.name_length = 0;
+		}
 	}
 
 	free(query.qname);
+	query.qname_length = 0;
 	return;
 }
