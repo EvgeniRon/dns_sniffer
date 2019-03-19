@@ -82,30 +82,30 @@ static void parse_query(char *dns_packet, char *seek_ptr, query_t *query) {
 
 static void parse_answer(char *dns_packet, char *seek_ptr, resource_record_t *answer) {
 	char name[MAX_NAME_LEN];
-	char str[INET_ADDRSTRLEN];
+	char str[INET6_ADDRSTRLEN];
 	int type;
-	unsigned long tip;
 
 	answer->name_length = parse_name(dns_packet, seek_ptr, &name[0], sizeof(name));
 	answer->name = malloc(sizeof(char) * answer->name_length);
 	memcpy(answer->name, &name, answer->name_length);
 
-	seek_ptr += answer->name_length;
+	seek_ptr = seek_ptr + answer->name_length;
 	answer->resource = (rr_const_fields_t *)seek_ptr;
 
-	seek_ptr += sizeof(rr_const_fields_t);
-	answer->rdata = (unsigned char *)seek_ptr;
+	seek_ptr += 2; // Skip Type field (2 bytes size)
+	seek_ptr += 2; // Skip Class field (2 bytes size)
+	seek_ptr += 4; // Skip TTL field (4 bytes)
+	seek_ptr += 2; // Skip RDLENGTH field (2 bytes)
+	answer->rdata = seek_ptr;
 
 	type = ntohs(answer->resource->type);
 	switch(type) {
 		case TYPE_A:
-			tip = 0;
-			//*(((unsigned char *)&tip) + 3) = *answer->rdata++;
-			//*(((unsigned char *)&tip) + 2) = *answer->rdata++;
-			//*(((unsigned char *)&tip) + 1) = *answer->rdata++;
-			//*((unsigned char *)&tip) = *answer->rdata++;			// Network odering
-			printf("RRs : TYPE_A = %s", inet_ntop(AF_INET, answer->rdata, str, INET_ADDRSTRLEN));
-			break;	
+			printf("RRs : TYPE_A (IPv4) = %s\n", inet_ntop(AF_INET, answer->rdata, str, INET_ADDRSTRLEN));
+			break;
+		case TYPE_AAAA:
+			printf("RRs : TYPE_AAAA (IPv6) %s\n", inet_ntop(AF_INET6, answer->rdata, str, INET6_ADDRSTRLEN));
+			break;
 	}
 
 }
@@ -157,7 +157,6 @@ void parse_dns_response(void *dns_packet) {
 	int id = ntohs(dns_header->id);
     int num_questions = ntohs(dns_header->qdcount);
     int num_answers = ntohs(dns_header->ancount);
-	printf("DNS ID: %x\n", id);
 	
 	// Point to the Query section
     current = (char *)dns_packet + sizeof(dnshdr_t);
@@ -170,17 +169,13 @@ void parse_dns_response(void *dns_packet) {
 		printf("domain name: %s\n", query.qname);
 
 		// point to the answer section
-		current += query.qname_length +sizeof(question_const_fields_t);
+		current = current + query.qname_length +sizeof(question_const_fields_t);
 
 		parse_answer(dns_packet, current, &answer);
 		
-//		parse_answer(answer.name, num_answers);
-//		printf("-- END OF RECORD --\n\n");
-		
-//		free(domain_name);
+		free(answer.name);
 	}
 
 	free(query.qname);
-	free(answer.name);
 	return;
 }

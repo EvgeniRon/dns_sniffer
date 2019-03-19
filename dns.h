@@ -50,7 +50,7 @@ typedef struct rr_const_fields {
  */
 typedef struct resource_record {
 	unsigned char *name;
-	unsigned int name_length;
+	unsigned char name_length;
 	rr_const_fields_t *resource;
 	unsigned char *rdata;
 } resource_record_t;
@@ -60,7 +60,7 @@ typedef struct resource_record {
  */
 typedef struct query {
 	unsigned char *qname;
-	unsigned int qname_length;
+	unsigned char qname_length;
 	question_const_fields_t *question;
 } query_t;
 

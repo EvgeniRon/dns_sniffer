@@ -186,22 +186,6 @@ void print_DNS_Header (struct dnshdr *dnsh)
     return;
 }
 
-// void print_IPv6_header(struct ip6_hdr* ip6h)
-// {
-//     fprintf(logfile , "\nIPv6 Header\n");
-//     fprintf(logfile , "   |-Source Address      : %d\n" , ntohs(ip6h->ip6_src));
-//     fprintf(logfile , "   |-Destination Address : %d\n" , ntohs(ip6h->ip6_dst));
-//     fprintf(logfile , "   |-Version             : 6\n" );
-//     //union
-//     //if(  =sizeof(ip6_hdrctl))
-//     fprintf(logfile , "   |-Flow Label          : %d\n" , ntohs(ip6h-> ip6_ctlun->ip6_hdrctl->ip6_un1_flow));
-//     fprintf(logfile , "   |-Payload Length      : %d\n" , ntohs(ip6h-> ip6_ctlun->ip6_hdrctl->ip6_un1_plen));
-//     fprintf(logfile , "   |-Next Header         : %d\n" , ntohs(ip6h-> ip6_ctlun->ip6_hdrctl->ip6_un1_nxt));
-//     fprintf(logfile , "   |-Hop Limit           : %d\n" , ntohs(ip6h-> ip6_ctlun->ip6_hdrctl-> ip6_un1_hlim));
-//     fprintf(logfile , "\n");
-// }
-
-
 static void process_tcp_dns(struct tcphdr *hdr) {
     tcp++;
 
@@ -209,19 +193,17 @@ static void process_tcp_dns(struct tcphdr *hdr) {
 	unsigned short src_port = ntohs(hdr->source);
 	unsigned short dst_port = ntohs(hdr->dest);
 
+    // Sanity check
     if (src_port == 53 || dst_port == 53) {
             dns++;
             fprintf(logfile , "Packet type: DNS\n");
             // printf("*******************************\n");
-            struct dnshdr *shdr;
-            // printf("Size of DNS: %d\n", sizeof(struct dnshdr));
-            // int size = sizeof(buffer) - (sizeof(struct dnshdr) + sizeof(struct tcphdr) + sizeof(struct ether_header) + sizeof(struct iphdr));
-            // printf("Size of payload: %d\n", size);
-            shdr = (struct dnshdr *)((char *)hdr + sizeof(struct tcphdr));
+            struct dnshdr *dns_hdr;
+            dns_hdr = (struct dnshdr *)((char *)hdr + sizeof(struct tcphdr));
             fprintf(logfile , "\n");
             fprintf(logfile , "DNS message\n");
             // PrintData(buffer + hdrsize, size-hdrsize);
-            print_DNS_Header(shdr);
+            print_DNS_Header(dns_hdr);
             fprintf(logfile , "\n");
         }
 }
@@ -238,16 +220,14 @@ static void process_udp_dns(struct udphdr *hdr) {
 
     /* sanity check - dns using port 53 */
     if (src_port == 53 || dst_port == 53) {
-        dns++;
-        fprintf(logfile , "Packet type: DNS\n");
-
-        // printf("*******************************\n");
         struct dnshdr *dns_hdr;
-        // printf("Size of DNS: %d\n", sizeof(struct dnshdr));
-        // int size = sizeof(buffer) - (sizeof(struct dnshdr) + sizeof(struct tcphdr) + sizeof(struct ether_header) + sizeof(struct iphdr));
-        // printf("Size of payload: %d\n", size);
+        
+        dns++;
+        
 
         dns_hdr = (struct dnshdr *)((char *)hdr + sizeof(struct udphdr));
+
+        fprintf(logfile , "Packet type: DNS\n");
         fprintf(logfile , "\n");
         fprintf(logfile , "DNS message\n");
 
