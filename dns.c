@@ -92,7 +92,7 @@ static int parse_query(char *dns_packet, char *seek_ptr, query_t *query) {
 static int parse_answer(char *dns_packet, char *seek_ptr, resource_record_t *answer) {
 	char name[MAX_NAME_LEN];
 	int uncompressed_name_length;
-
+                                                                                                                                                                                                                
 	// Get the name and its length - the length may be smaller than the string itself (compressed pointer)
 	answer->name_length = parse_name(dns_packet, seek_ptr, &name[0], sizeof(name));
 	if (answer->name_length == 0) {
@@ -147,7 +147,7 @@ void parse_dns_response(void *dns_packet) {
 		current = current + query.qname_length +sizeof(question_const_fields_t);
 		
 		// loop through all the answers
-		for (int i = 0; i < num_answers; i++) {
+		for (int i = 0; i < num_answers - 1; i++) {
 			ret = parse_answer(dns_packet, current, &answer);
 			if(ret == EXIT_FAILURE) {
 				return;
