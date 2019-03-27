@@ -1,6 +1,6 @@
 # DNS Sniffer
 
-An exercise to understand DNS protocol -DNS Sniffer is a program that prints the domain name and the resolved IP.
+An exercise to understand DNS protocol - DNS Sniffer is a program that prints the domain name and the resolved IP.
 Uses BPF without libpcap.
 
 ## Installation
